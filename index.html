@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Page | Paper Title</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js"></script>
+
+    <!-- MathJax for LaTeX Support -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+
+    <style>
+        /* --- CSS VARIABLES & THEMES --- */
+        :root {
+            /* Light Theme Only */
+            --bg-gradient: linear-gradient(135deg, #f0f7ff, #e8f4f8);
+            --text-main: #1a1a1a;
+            --text-secondary: #4a4a4a;
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --glass-shadow: 0 8px 32px 0 rgba(33, 150, 243, 0.1);
+            --accent: #2196F3;
+            --accent-hover: #1976D2;
+            --code-bg: rgba(245, 245, 245, 0.8);
+        }
+
+        /* --- RESET & BASE --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            overflow-x: hidden;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        /* --- 3D BACKGROUND --- */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* --- LAYOUT --- */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 4rem 1.5rem;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+            text-align: center;
+            /* Center align by default for title */
+        }
+
+        /* --- GLASS COMPONENTS --- */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: var(--glass-shadow);
+            padding: 2.5rem;
+            text-align: left;
+            /* Reset text align for content */
+        }
+
+        /* --- HEADER SECTION --- */
+        .paper-header {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .paper-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            background: -webkit-linear-gradient(0deg, var(--text-main), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .author-list {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .author-list a {
+            color: var(--text-main);
+            text-decoration: none;
+            margin: 0 0.5rem;
+            position: relative;
+        }
+
+        .author-list a:hover {
+            color: var(--accent);
+        }
+
+        .venue {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .venue a {
+            color: var(--text-main);
+            text-decoration: none;
+            margin: 0 0.5rem;
+            position: relative;
+        }
+
+        .venue a:hover {
+            color: var(--accent);
+        }
+
+        .affiliations {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .link-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-main {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            backdrop-filter: blur(4px);
+            transition: all 0.3s ease;
+        }
+
+        .btn-main:hover {
+            background: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
+            border-color: var(--accent);
+        }
+
+        /* --- TEASER --- */
+        .teaser-img {
+            width: 100%;
+            border-radius: 12px;
+            margin-top: 1rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        .teaser-caption {
+            color: var(--text-secondary);
+            margin-top: 1rem;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+
+        /* --- CONTENT SECTIONS --- */
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+            border-bottom: 2px solid var(--accent);
+            display: inline-block;
+            padding-bottom: 0.3rem;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.8rem;
+            color: var(--text-main);
+            margin-top: 2rem;
+            font-weight: 600;
+        }
+
+        p {
+            line-height: 1.7;
+            color: var(--text-main);
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+        }
+
+        /* --- BIBTEX --- */
+        .bibtex-box {
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            border: 1px solid var(--glass-border);
+            position: relative;
+        }
+
+        pre {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            white-space: pre-wrap;
+        }
+
+        /* --- TABLES --- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+
+        th,
+        td {
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .best-score {
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        /* --- COMPARISON SLIDER --- */
+        .comp-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 2rem auto;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            cursor: col-resize;
+            line-height: 0;
+            /* Remove bottom image gap */
+        }
+
+        .comp-img-back {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .comp-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 50%;
+            /* Start at 50% */
+            overflow: hidden;
+            border-right: 3px solid var(--accent);
+            z-index: 5;
+        }
+
+        .comp-img-front {
+            height: 100%;
+            /* Width will be set by JS to match container */
+            max-width: none;
+            display: block;
+        }
+
+        .comp-slider {
+            position: absolute;
+            z-index: 10;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent);
+            border: 3px solid white;
+            border-radius: 50%;
+            cursor: col-resize;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            /* Let clicks pass to container */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .comp-slider::after {
+            content: '↔';
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .comp-label {
+            position: absolute;
+            top: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+        }
+
+        .label-left {
+            left: 1rem;
+            z-index: 6;
+        }
+
+        .label-right {
+            right: 1rem;
+            z-index: 4;
+        }
+
+        /* --- RESULTS GRID & SELECTOR --- */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            /* Changed to 3 columns */
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .result-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            transition: transform 0.3s ease;
+        }
+
+        .result-item:hover {
+            transform: scale(1.02);
+            z-index: 10;
+        }
+
+        .result-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .result-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            font-size: 0.85rem;
+            text-align: center;
+            backdrop-filter: blur(4px);
+            font-weight: 600;
+        }
+
+        .dataset-selector {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Replaced .dataset-thumb with .dataset-btn to match table buttons */
+        .dataset-btn {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+            padding: 0.5rem 2rem;
+            /* Wider padding */
+            border-radius: 20px;
+            /* Pill shape */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+            min-width: 120px;
+            /* Ensure they are wide */
+        }
+
+        .dataset-btn:hover,
+        .dataset-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* --- TABLE TABS --- */
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .tab-btn.active,
+        .tab-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
+        }
+
+        /* --- METHODOLOGY LAYOUT --- */
+        .method-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            align-items: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .method-row img {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .method-row img:hover {
+            transform: scale(1.02);
+        }
+
+        .method-text h3 {
+            margin-top: 0;
+            /* Reset global h3 margin for this context */
+            color: var(--accent);
+        }
+
+        /* --- BIBTEX SCROLLBAR ("Slide Bar") --- */
+        .bibtex-box {
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            /* Enable horizontal scroll */
+            border: 1px solid var(--glass-border);
+            position: relative;
+        }
+
+        /* Custom Scrollbar Styling */
+        .bibtex-box::-webkit-scrollbar {
+            height: 10px;
+            /* Visible height */
+        }
+
+        .bibtex-box::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            margin: 0 10px;
+        }
+
+        .bibtex-box::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            /* Matches the purple buttons */
+            border-radius: 5px;
+            border: 2px solid transparent;
+            background-clip: content-box;
+        }
+
+        .bibtex-box::-webkit-scrollbar-thumb:hover {
+            background-color: var(--accent-hover);
+        }
+
+        pre {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.0rem;
+            /* Made text smaller */
+            color: var(--text-main);
+            white-space: pre;
+            /* Forces text to stay on one line, creating the "slide bar" effect */
+        }
+
+        .metrics-table {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            .paper-title {
+                font-size: 2rem;
+            }
+
+            .container {
+                padding: 2rem 1rem;
+            }
+
+            .glass-panel {
+                padding: 1.5rem;
+            }
+
+            .link-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn-main {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            /* Stack method rows on mobile */
+            .method-row {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                text-align: center;
+            }
+
+            /* Reorder second row so image is on top for mobile consistency if desired, 
+               but default stacking (Text then Image) is often preferred for flow. 
+               Leaving default stacking order. */
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 3D Background -->
+    <div id="canvas-container"></div>
+
+    <div class="container">
+
+        <!-- HEADER -->
+        <header class="paper-header">
+            <img src="./static/imgs/logo_transparent.png" alt="Logo" style="max-width: 400px; height: auto; margin-bottom: 1.5rem; display: block; margin-left: auto; margin-right: auto;">
+            <h1 class="paper-title">RAYNOVA: Scale-Temporal Autoregressive World Modeling in Ray Space
+            </h1>
+
+            <div class="author-list">
+                <a href="#">Yichen Xie</a><sup>1,2,*</sup>,
+                <a href="#">Chensheng Peng</a><sup>1,2,*</sup>,
+                <a href="#">Mazen Abdelfattah</a><sup>1</sup>,
+                <a href="#">Yihan Hu</a><sup>1</sup>,
+                <a href="#">Jiezhi Yang</a><sup>1</sup>,
+                <a href="#"">Eric Higgins</a><sup>1</sup>,
+                <a href=" #">Ryan Brigden</a><sup>1</sup>,
+                <a href="#">Masayoshi Tomizuka</a><sup>2</sup>,
+                <a href="#">Wei Zhan</a><sup>1,2</sup>
+            </div>
+
+            <div class="affiliations">
+                <sup>1</sup>Applied Intuition, <sup>2</sup>UC Berkeley, <sup>*</sup>Equal Contribution and work done as interns at Applied Intuition
+                <br><br>
+                Contact: research@applied.com
+            </div>
+            <div class="venue">
+                </a>CVPR 2026</a>
+            </div>
+            <div class="venue">
+            </a>(Outstanding Paper, RIWM Workshop @ ICCV 2025)</a>
+            </div>
+
+            <div class="link-buttons">
+                <a href="#" class="btn-main">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z" />
+                        <path d="M7 7h10v2H7zm0 4h10v2H7zm0 4h7v2H7z" />
+                    </svg>
+                    Paper
+                </a>
+                <a href="#" class="btn-main">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zM6 20V4h5v5h5v11H6z" />
+                    </svg>
+                    Code
+                </a>
+            </div>
+        </header>
+
+        <!-- TEASER SECTION -->
+        <!-- <section class="glass-panel" data-tilt data-tilt-max="2" data-tilt-glare data-tilt-max-glare="0.05">
+            <img src="https://placehold.co/900x400/1e293b/FFF?text=Teaser+Video" alt="Teaser" class="teaser-img">
+            <p class="teaser-caption">
+                <b>Figure 1:</b> Our method reconstructs high-fidelity 3D models from as few as 3 sparse input views, significantly outperforming previous SOTA methods in geometry preservation and texture details.
+            </p>
+        </section> -->
+
+        <!-- TL;DR -->
+        <section class="glass-panel" data-tilt data-tilt-max="2" data-tilt-glare data-tilt-max-glare="0.05">
+            <h2>TL;DR</h2>
+            <p style="font-size: 1.1rem; font-weight: 500; margin-bottom: 0;">
+                We propose a scale-temporal dual-causal autoregressive multiview world model that unifies space and time with ray-level relative positioning.
+            </p>
+        </section>
+
+        <!-- ABSTRACT -->
+        <section class="glass-panel">
+            <h2>Abstract</h2>
+            <p>
+                World foundation models aim to simulate the evolution of the real world with physically plausible behavior. 
+                Unlike prior methods that handle spatial and temporal correlations separately, we propose RAYNOVA, a geometry-agonistic multiview world model for driving scenarios that employs a dual-causal autoregressive framework. 
+                It follows both scale-wise and temporal topological orders in the autoregressive process, and leverages global attention for unified 4D spatio-temporal reasoning. 
+                Different from existing works that impose strong 3D geometric priors, RAYNOVA constructs an isotropic spatio-temporal representation across views, frames, and scales based on relative Plücker-ray positional encoding, enabling robust generalization to diverse camera setups and ego motions. 
+                We further introduce a recurrent training paradigm to alleviate distribution drift in long-horizon video generation. RAYNOVA achieves state-of-the-art multi-view video generation results on nuScenes, while offering higher throughput and strong controllability under diverse input conditions, generalizing to novel views and camera configurations without explicit 3D scene representation. 
+            </p>
+            <img src="./static/imgs/raynova_teaser.png"
+                onerror="this.src='https://placehold.co/900x400/1e293b/FFF?text=Comparison:+Voxel+vs+Mesh+vs+Ours'"
+                style="width: 100%;border-radius: 8px; margin: 1rem 0; border: 1px solid var(--glass-border);">
+            <p>
+                <center><b>Figure 1: Demonstrations of RAYNOVA as Versatile World Foundation Model.</b><center>
+            </p>
+            </section>
+
+        <!-- METHOD / PIPELINE -->
+        <section class="glass-panel">
+            <h2>Methodology</h2>
+            <p>
+                RAYNOVA applies a pure autoregressive architecture with discrete tokens free of any diffusion modules. It auto-regresses along two dimensions simultaneously: scale and time.
+                Instead of forcing a particular 3D structure, it represents the token position in camera ray space — a representation that naturally connects views, frames, and scales without explicitly constructing a 3D scene graph.
+            </p>
+            <img src="./static/imgs/raynova_overview.png"
+                onerror="this.src='https://placehold.co/1127x484stage/1e293b/FFF?text=Pipeline+Overview'" alt="Pipeline"
+                class="teaser-img" style="margin-bottom: 1rem;">
+            <p>
+                <b>Figure 2:  Overview of RAYNOVA Framework.</b> RAYNOVA is composed of dual-casual (scale and time) blocks. The local scale attentionand local cross attention works on each image indepedently, while the global causal attention works across multi-view and multiframe images enhanced with a unified ray-level relative position embedding for better spatio-temporal consistency.
+            </p>
+            <!-- Proposed 1: Image Left, Text Right -->
+            <div class="method-row">
+                <div class="method-img">
+                    <img src="./static/imgs/raynova_dual-causal.png"
+                        onerror="this.src='https://placehold.co/500x350/1e293b/FFF?text=Stage+1:+Geometry'"
+                        alt="Dual-Causal Autoregression">
+                    <p>
+                        <b>Figure 3: Dual-Causal Autoregression.</b> <font color="#006600">Green</font>
+                        arrows represent the causal dependency, while the darkness indicates the topological order of autoregression (from <font color="#E3F0D9">light</font> to <font color="#426629">dark</font>)
+                    </p>
+                </div>
+                <div class="method-text">
+                    <h3>Dual-Causal Autoregression</h3>
+                    <p>
+                        RAYNOVA auto-regresses along two dimensions simultaneously: scale and time.
+                        It generates images scale by scale: first coarse structure then fine-grained details. At the same time, the model autoregresses across frames. The current frame is conditioned on all views from previous frames to create a unified temporal reasoning process across multi-view inputs.
+                        This dual-casuality enables efficient long-horizon video generation with flexible frame rate and image resolution.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Proposed 2: Text Left, Image Right -->
+            <div class="method-row">
+                <div class="method-text">
+                    <h3>Ray-Level Relative Position</h3>
+                    <p>
+                        To reason across views and time, the model must know how tokens relate to each other spatially and temporally. 
+                        Without any global coordinate frame, RAYNOVA instead uses relative positions in camera ray space. 
+                        It encodes how tokens relate to each other across views, frames, and scales with minimal handcrafted geometric bias.
+                        Since it is relative rather than absolute, the model does not memorize a specific world layout. 
+                        As a result, RAYNOVA is designed as a scalable data-driven framework that supports heterogeneous training data, unseen camera configurations and extrapolation beyond training range. 
+                    </p>
+                </div>
+                <div class="method-img">
+                    <img src="./static/imgs/raynova_position.png"
+                        onerror="this.src='https://placehold.co/500x350/2196F3/FFF?text=Stage+2:+Texture+Diffusion'"
+                        alt="Ray-Level Relative Position">
+                        <p>
+                            <b>Figure 4: Ray-Level Relative Position Embedding.</b> The ray-level relative position embedding is computed by the difference between the camera ray coordinates. 
+                        </p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- RESULTS -->
+        <section class="glass-panel">
+            <h2>Results</h2>
+
+            <!-- Qualitative Subsection -->
+            <h3 style="margin-top: 0;">Multiview Video Generation</h3>
+            <p>
+                We compare quantitative metrics against state-of-the-art methods on nuScenes dataset. Our method consistently outperforms baselines in visual quality while generating multiview video with higher resolution and lower latency.
+            </p>
+            <center>
+            <img src="./static/imgs/raynova_video.png"
+                onerror="this.src='https://placehold.co/900x400/1e293b/FFF?text=Comparison:+Voxel+vs+Mesh+vs+Ours'"
+                style="width: 70%;border-radius: 8px; margin: 1rem 0; border: 1px solid var(--glass-border);">
+            </center>
+            <img src="./static/videos/gif/video1.gif"
+                onerror="this.src='https://placehold.co/900x400/1e293b/FFF?text=Comparison:+Voxel+vs+Mesh+vs+Ours'"
+                style="width: 100%;border-radius: 8px; margin: 1rem 0; border: 1px solid var(--glass-border);">
+            <img src="./static/videos/gif/video2.gif"
+                onerror="this.src='https://placehold.co/900x400/1e293b/FFF?text=Comparison:+Voxel+vs+Mesh+vs+Ours'"
+                style="width: 100%;border-radius: 8px; margin: 1rem 0; border: 1px solid var(--glass-border);">
+            <img src="./static/videos/gif/video3.gif"
+                onerror="this.src='https://placehold.co/900x400/1e293b/FFF?text=Comparison:+Voxel+vs+Mesh+vs+Ours'"
+                style="width: 100%;border-radius: 8px; margin: 1rem 0; border: 1px solid var(--glass-border);">
+            <!-- Quantitative Subsection -->
+            <h3>Fidelity to Conditions</h3>
+            <p>
+                We apply perception models pretrained on real scenes to our synthesized videos to evaluate the fidelity to conditions. Both vision-based and multi-modal (combined with ground-truth
+                point clouds) perception models are considered in the evaluation to comprehensively evaluate both the semantic and geometric realism of our synthetic scenes.
+            </p>
+            <img src="./static/imgs/raynova_fidelity.png"
+                onerror="this.src='https://placehold.co/900x400/1e293b/FFF?text=Comparison:+Voxel+vs+Mesh+vs+Ours'"
+                style="width: 100%;border-radius: 8px; margin: 1rem 0; border: 1px solid var(--glass-border);">
+            <h3>Novel View Synthesis</h3>
+                <p>
+                    Thanks to the flexible ray-level relative position embedding, RayNova is able to synthesize novel views with different camera shifts, rotations, and fields-of-views. It can even support scenes with novel camera configurations that are unseen in the training data.
+                </p>
+                <center>
+                <img src="./static/imgs/raynova_shift.png"
+                    onerror="this.src='https://placehold.co/900x400/1e293b/FFF?text=Comparison:+Voxel+vs+Mesh+vs+Ours'"
+                    style="width: 80%;border-radius: 8px; margin: 1rem 0; border: 1px solid var(--glass-border);">
+                <img src="./static/imgs/raynova_rotation.png"
+                    onerror="this.src='https://placehold.co/900x400/1e293b/FFF?text=Comparison:+Voxel+vs+Mesh+vs+Ours'"
+                    style="width: 80%;border-radius: 8px; margin: 1rem 0; border: 1px solid var(--glass-border);">
+                <p><b>Figure 6: Novel View Synthesis with Camera Shifts (top) and Rotations (bottom).</b></p>
+                </center>
+        </section>
+
+        <!-- BIBTEX -->
+        <section class="glass-panel">
+            <h2>Citation</h2>
+            <div class="bibtex-box">
+                <pre>@article{researcher2024glass,
+  title={Generative Glass: High-Fidelity 3D Reconstruction},
+  author={Researcher, Alex and Doe, Jane and Smith, John and Johnson, Alice and Williams, Bob and Brown, Charlie and Miller, David and Green, Eva and Wright, Frank},
+  journal={Conference on Computer Vision (CVPR)},
+  year={2024}
+}</pre>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // --- VANILLA TILT INIT ---
+        VanillaTilt.init(document.querySelectorAll("[data-tilt]"), {
+            max: 3,
+            speed: 400,
+            glare: true,
+            "max-glare": 0.1,
+        });
+
+        // --- RESULTS DATASETS ---
+        const datasets = {
+            'bonsai': {
+                NopoSplat: "./static/imgs/nopo/bonsai.png",
+                AnySplat: "./static/imgs/any/bonsai.png",
+                ours: "./static/imgs/uni/bonsai.png",
+                gt: "./static/imgs/gt/bonsai.png"
+            },
+            'counter': {
+                NopoSplat: "./static/imgs/nopo/counter.png",
+                AnySplat: "./static/imgs/any/counter.png",
+                ours: "./static/imgs/uni/counter.png",
+                gt: "./static/imgs/gt/counter.png"
+            },
+            'room': {
+                NopoSplat: "./static/imgs/nopo/room.png",
+                AnySplat: "./static/imgs/any/room.png",
+                ours: "./static/imgs/uni/room.png",
+                gt: "./static/imgs/gt/room.png"
+            }
+        };
+
+        function updateResults(datasetKey, clickedThumb) {
+            const container = document.getElementById('results-display');
+            const data = datasets[datasetKey];
+
+            // Update Active State (works for buttons too)
+            document.querySelectorAll('.dataset-btn').forEach(t => t.classList.remove('active'));
+            clickedThumb.classList.add('active');
+
+            // Fade Out
+            container.style.opacity = '0';
+
+            setTimeout(() => {
+                // Update Content - Removed GT, kept 3 items
+                container.innerHTML = `
+                    <div class="result-item">
+                        <img src="${data.NopoSplat}" alt="NopoSplat">
+                        <div class="result-label">Nopo-Splat</div>
+                    </div>
+                    <div class="result-item">
+                        <img src="${data.AnySplat}" alt="AnySplat">
+                        <div class="result-label">AnySplat</div>
+                    </div>
+                    <div class="result-item">
+                        <img src="${data.ours}" alt="Ours">
+                        <div class="result-label">Ours</div>
+                    </div>
+                `;
+                // Fade In
+                container.style.opacity = '1';
+            }, 200);
+        }
+
+        // Initialize with Bonsai
+        document.addEventListener('DOMContentLoaded', () => {
+            const firstBtn = document.querySelector('.dataset-btn');
+            if (firstBtn) updateResults('bonsai', firstBtn);
+        });
+
+        // --- TABLE SWITCHING LOGIC ---
+        function switchTable(tableId, btn) {
+            // Update buttons
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Hide all tables
+            document.querySelectorAll('.metrics-table').forEach(t => t.style.display = 'none');
+
+            // Show selected table
+            document.getElementById('table-' + tableId).style.display = 'block';
+        }
+
+        // --- THREE.JS BACKGROUND ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+
+        const container3d = document.getElementById('canvas-container');
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        container3d.appendChild(renderer.domElement);
+
+        // Particles
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 700;
+
+        const posArray = new Float32Array(particlesCount * 3);
+
+        for (let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 15;
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+        // Material
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.025,
+            color: 0x2196F3,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        camera.position.z = 3;
+
+        // Mouse interaction
+        let mouseX = 0;
+        let mouseY = 0;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = event.clientX / window.innerWidth - 0.5;
+            mouseY = event.clientY / window.innerHeight - 0.5;
+        });
+
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+
+            particlesMesh.rotation.y = elapsedTime * 0.03;
+            particlesMesh.rotation.y += mouseX * 0.1;
+            particlesMesh.rotation.x += mouseY * 0.1;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>
